@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Test definitions for the bnx mod form addons.
+ *
+ * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
+ */
+
 namespace bbbext_bnx;
 
 use bbbext_bnx\bigbluebuttonbn\mod_form_addons;
@@ -22,15 +31,28 @@ use bbbext_bnx\local\service\bnx_settings_service;
 /**
  * Tests for the BNX mod_form_addons hooks.
  *
- * @package    bbbext_bnx
- * @covers     \bbbext_bnx\bigbluebuttonbn\mod_form_addons
+ * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
+ * @covers    \bbbext_bnx\bigbluebuttonbn\mod_form_addons
  */
 final class mod_form_addons_test extends \advanced_testcase {
+    /**
+     * Setup test case.
+     *
+     * @return void
+     */
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest(true);
     }
 
+    /**
+     * Test data_preprocessing populates defaults from settings.
+     *
+     * @return void
+     */
     public function test_data_preprocessing_populates_defaults_from_settings(): void {
         global $CFG;
 
@@ -50,6 +72,11 @@ final class mod_form_addons_test extends \advanced_testcase {
         $this->assertSame(1, $defaults['enablecam']);
     }
 
+    /**
+     * Test data_preprocessing ignores missing BNX record.
+     *
+     * @return void
+     */
     public function test_data_preprocessing_ignores_missing_bnx_record(): void {
         global $CFG;
 
@@ -63,6 +90,11 @@ final class mod_form_addons_test extends \advanced_testcase {
         $this->assertSame(['id' => 9999, 'preset' => 123], $defaults);
     }
 
+    /**
+     * Test other hooks remain no-ops.
+     *
+     * @return void
+     */
     public function test_other_hooks_remain_noops(): void {
         global $CFG;
 
@@ -91,9 +123,9 @@ final class mod_form_addons_test extends \advanced_testcase {
     }
 
     /**
-     * Ensure BNX base record exists for module id, returning id.
+     * Ensure bnx base record exists for module id, returning id.
      *
-     * @param int $moduleid
+     * @param int $moduleid module identifier
      * @return int
      */
     private function ensure_bnx_record(int $moduleid): int {

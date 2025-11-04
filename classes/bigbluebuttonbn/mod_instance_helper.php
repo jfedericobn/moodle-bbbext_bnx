@@ -14,9 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace bbbext_bnx\bigbluebuttonbn;
+/**
+ * Definitions for the bnx module instance helper.
+ *
+ * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-defined('MOODLE_INTERNAL') || die();
+namespace bbbext_bnx\bigbluebuttonbn;
 
 use bbbext_bnx\local\service\bnx_settings_service;
 use stdClass;
@@ -25,10 +31,20 @@ use stdClass;
  * BNX lifecycle helper.
  *
  * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
  */
 class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_instance_helper {
+    /**
+     * Table storing base bnx records.
+     * @var string
+     */
     private const BNX_TABLE = 'bbbext_bnx';
 
+    /**
+     * Mapping between form fields and stored setting names.
+     */
     public const FEATURE_FIELD_MAP = [
         'enablecam' => 'enablecam',
         'enablemic' => 'enablemic',
@@ -38,12 +54,25 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         'enablenote' => 'enablenotes',
     ];
 
+    /**
+     * Service handling persistence of bnx settings.
+     * @var bnx_settings_service
+     */
     private bnx_settings_service $service;
 
+    /**
+     * Initialise the helper with a settings service instance.
+     */
     public function __construct() {
         $this->service = new bnx_settings_service();
     }
 
+    /**
+     * Persist bnx details when an instance is created.
+     *
+     * @param stdClass $bigbluebuttonbn module data payload
+     * @return void
+     */
     public function add_instance(stdClass $bigbluebuttonbn) {
         $bnxid = $this->persist_bnx_record($bigbluebuttonbn);
         if ($bnxid !== null) {
@@ -51,6 +80,12 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         }
     }
 
+    /**
+     * Sync bnx details when a module is updated.
+     *
+     * @param stdClass $bigbluebuttonbn module data payload
+     * @return void
+     */
     public function update_instance(stdClass $bigbluebuttonbn): void {
         $bnxid = $this->persist_bnx_record($bigbluebuttonbn);
         if ($bnxid !== null) {
@@ -58,6 +93,12 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         }
     }
 
+    /**
+     * Cleanup persisted settings when a module is deleted.
+     *
+     * @param int $moduleid module identifier
+     * @return void
+     */
     public function delete_instance(int $moduleid): void {
         $bnxid = $this->get_bnx_id($moduleid);
         if ($bnxid === null) {
@@ -67,10 +108,21 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         $this->service->delete_settings($bnxid);
     }
 
+    /**
+     * Report extension tables used to store related data.
+     *
+     * @return string[]
+     */
     public function get_join_tables(): array {
         return [bnx_settings_service::BNX_SETTINGS_TABLE];
     }
 
+    /**
+     * Ensure the bnx base record exists for supplied payload.
+     *
+     * @param stdClass $data module data payload
+     * @return int|null bnx identifier when available
+     */
     private function persist_bnx_record(stdClass $data): ?int {
         $moduleid = $this->resolve_module_id($data);
         if ($moduleid === null) {
@@ -80,6 +132,13 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         return $this->upsert_bnx_record($moduleid);
     }
 
+    /**
+     * Persist feature settings for the given bnx record.
+     *
+     * @param int $bnxid bnx identifier
+     * @param stdClass $data module data payload
+     * @return void
+     */
     private function persist_settings(int $bnxid, stdClass $data): void {
         $values = $this->collect_feature_values($data);
         if (!empty($values)) {
@@ -87,6 +146,12 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         }
     }
 
+    /**
+     * Collect feature toggles from the submitted payload.
+     *
+     * @param stdClass $data module data payload
+     * @return array<string, int> normalised field values keyed by setting name
+     */
     private function collect_feature_values(stdClass $data): array {
         $values = [];
         foreach (self::FEATURE_FIELD_MAP as $field => $setting) {
@@ -100,6 +165,12 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         return $values;
     }
 
+    /**
+     * Normalise input into a persisted integer value.
+     *
+     * @param mixed $value raw form value
+     * @return int
+     */
     private function normalise_value($value): int {
         if (is_bool($value)) {
             return $value ? 1 : 0;
@@ -111,6 +182,12 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         return empty($value) ? 0 : 1;
     }
 
+    /**
+     * Resolve the bnx base record identifier.
+     *
+     * @param int $moduleid module identifier
+     * @return int|null
+     */
     private function get_bnx_id(int $moduleid): ?int {
         global $DB;
 
@@ -118,6 +195,12 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         return $record ? (int)$record->id : null;
     }
 
+    /**
+     * Extract a module id from supported payload shapes.
+     *
+     * @param stdClass $data module data payload
+     * @return int|null
+     */
     private function resolve_module_id(stdClass $data): ?int {
         return match (true) {
             !empty($data->id) => (int)$data->id,
@@ -127,6 +210,12 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
         };
     }
 
+    /**
+     * Ensure a bnx base record exists for the module id.
+     *
+     * @param int $moduleid module identifier
+     * @return int bnx identifier
+     */
     private function upsert_bnx_record(int $moduleid): int {
         global $DB;
 

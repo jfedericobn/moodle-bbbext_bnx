@@ -14,29 +14,35 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Definitions for the bnx settings persistence service.
+ *
+ * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
+ */
+
 namespace bbbext_bnx\local\service;
-
-defined('MOODLE_INTERNAL') || die();
-
-use moodle_database;
 
 /**
  * Service wrapper for BNX settings persistence.
  *
- * This helper intentionally restricts itself to the `bbbext_bnx_settings`
- * table. It never creates, updates, or deletes rows from the parent
- * `bbbext_bnx` table, leaving lifecycle management for that table to other
- * components.
- *
  * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
  */
 class bnx_settings_service {
+    /**
+     * Table storing bnx extension settings.
+     */
     public const BNX_SETTINGS_TABLE = 'bbbext_bnx_settings';
 
     /**
      * Fetch settings for a BNX record.
      *
-     * @param int $bnxid BNX table primary key
+     * @param int $bnxid bnx parent record identifier
      * @return array<string, int>
      */
     public function get_settings(int $bnxid): array {
@@ -52,8 +58,8 @@ class bnx_settings_service {
     /**
      * Fetch a single setting value for the BNX record.
      *
-     * @param int $bnxid
-     * @param string $name
+     * @param int $bnxid bnx parent record identifier
+     * @param string $name setting name
      * @return int|null
      */
     public function get_setting(int $bnxid, string $name): ?int {
@@ -69,8 +75,8 @@ class bnx_settings_service {
     /**
      * Upsert multiple settings for a BNX record.
      *
-     * @param int $bnxid
-     * @param array<string, mixed> $values
+     * @param int $bnxid bnx parent record identifier
+     * @param array $values setting values keyed by name
      */
     public function set_settings(int $bnxid, array $values): void {
         foreach ($values as $name => $value) {
@@ -81,7 +87,7 @@ class bnx_settings_service {
     /**
      * Remove all settings for a BNX record.
      *
-     * @param int $bnxid
+     * @param int $bnxid bnx parent record identifier
      */
     public function delete_settings(int $bnxid): void {
         global $DB;
@@ -91,8 +97,8 @@ class bnx_settings_service {
     /**
      * Remove a specific setting entry for a BNX record.
      *
-     * @param int $bnxid
-     * @param string $name
+     * @param int $bnxid bnx parent record identifier
+     * @param string $name setting name
      */
     public function delete_setting(int $bnxid, string $name): void {
         global $DB;
@@ -105,9 +111,9 @@ class bnx_settings_service {
     /**
      * Internal helper to upsert a single setting row.
      *
-     * @param int $bnxid
-     * @param string $name
-     * @param mixed $value
+     * @param int $bnxid bnx parent record identifier
+     * @param string $name setting name
+     * @param mixed $value raw value to persist
      */
     private function set_setting(int $bnxid, string $name, $value): void {
         global $DB;
@@ -140,7 +146,7 @@ class bnx_settings_service {
     /**
      * Normalise incoming values so they match the schema.
      *
-     * @param mixed $value Raw value
+     * @param mixed $value raw value
      * @return int
      */
     private function normalise_value($value): int {

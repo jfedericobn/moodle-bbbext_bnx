@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Test definitions for the bnx instance helper.
+ *
+ * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
+ */
+
 namespace bbbext_bnx;
 
 use bbbext_bnx\bigbluebuttonbn\mod_instance_helper;
@@ -22,15 +31,28 @@ use bbbext_bnx\local\service\bnx_settings_service;
 /**
  * Tests for the BNX mod_instance_helper lifecycle hooks.
  *
- * @package    bbbext_bnx
- * @covers     \bbbext_bnx\bigbluebuttonbn\mod_instance_helper
+ * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
+ * @covers    \bbbext_bnx\bigbluebuttonbn\mod_instance_helper
  */
 final class mod_instance_helper_test extends \advanced_testcase {
+    /**
+     * Setup test case.
+     *
+     * @return void
+     */
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest(true);
     }
 
+    /**
+     * Test add_instance persists settings.
+     *
+     * @return void
+     */
     public function test_add_instance_persists_settings(): void {
         global $DB;
 
@@ -55,6 +77,11 @@ final class mod_instance_helper_test extends \advanced_testcase {
         $this->assertSame(0, $settings['enablemic']);
     }
 
+    /**
+     * Test add_instance ignores unconfigured settings.
+     *
+     * @return void
+     */
     public function test_update_instance_overwrites_settings(): void {
         global $DB;
 
@@ -73,6 +100,11 @@ final class mod_instance_helper_test extends \advanced_testcase {
         $this->assertSame(1, $service->get_setting($bnxid, 'enablecam'));
     }
 
+    /**
+     * Test delete_instance removes settings only.
+     *
+     * @return void
+     */
     public function test_delete_instance_removes_settings_only(): void {
         global $DB;
 
@@ -93,6 +125,11 @@ final class mod_instance_helper_test extends \advanced_testcase {
         $this->assertFalse($DB->record_exists('bbbext_bnx_settings', ['bnxid' => $bnxid]));
     }
 
+    /**
+     * Test get_join_tables method.
+     *
+     * @return void
+     */
     public function test_get_join_tables(): void {
         $helper = new mod_instance_helper();
         $this->assertSame(['bbbext_bnx_settings'], $helper->get_join_tables());
@@ -111,7 +148,7 @@ final class mod_instance_helper_test extends \advanced_testcase {
     /**
      * Ensure a BNX record exists for the given module id, returning its id.
      *
-     * @param int $moduleid
+     * @param int $moduleid module identifier
      * @return int
      */
     private function ensure_bnx_record(int $moduleid): int {

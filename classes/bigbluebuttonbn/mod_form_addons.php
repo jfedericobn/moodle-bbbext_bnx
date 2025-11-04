@@ -14,9 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace bbbext_bnx\bigbluebuttonbn;
+/**
+ * Definitions for the bnx mod form addons.
+ *
+ * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-defined('MOODLE_INTERNAL') || die();
+namespace bbbext_bnx\bigbluebuttonbn;
 
 use bbbext_bnx\local\service\bnx_settings_service;
 use stdClass;
@@ -25,19 +31,45 @@ use stdClass;
  * BNX mod form integration.
  *
  * @package   bbbext_bnx
+ * @copyright 2025 onwards, Blindside Networks Inc
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
  */
 class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addons {
+    /**
+     * Service used to fetch and persist settings.
+     * @var bnx_settings_service
+     */
     private bnx_settings_service $service;
 
+    /**
+     * Construct the addon wrapper around the Moodle form.
+     *
+     * @param \MoodleQuickForm $mform form instance
+     * @param stdClass|null $bigbluebuttonbndata existing module data
+     * @param string|null $suffix suffix used when the form fieldset is duplicated
+     */
     public function __construct(\MoodleQuickForm &$mform, ?stdClass $bigbluebuttonbndata = null, ?string $suffix = null) {
         parent::__construct($mform, $bigbluebuttonbndata, $suffix);
         $this->service = new bnx_settings_service();
     }
 
+    /**
+     * Apply post-processing adjustments to submitted data.
+     *
+     * @param stdClass $data form submission
+     * @return void
+     */
     public function data_postprocessing(stdClass &$data): void {
         // BNX currently leaves post-processing unchanged.
     }
 
+    /**
+     * Preload form defaults from stored settings.
+     *
+     * @param array|null $defaultvalues form defaults
+     * @return void
+     */
     public function data_preprocessing(?array &$defaultvalues): void {
         if (empty($defaultvalues['id'])) {
             return;
@@ -57,18 +89,41 @@ class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addo
         }
     }
 
+    /**
+     * Declare additional completion rules added by the addon.
+     *
+     * @return array
+     */
     public function add_completion_rules(): array {
         return [];
     }
 
+    /**
+     * Add supplementary form fields contributed by the addon.
+     *
+     * @return void
+     */
     public function add_fields(): void {
         // Parent BNX plugin does not expose additional form controls yet.
     }
 
+    /**
+     * Validate addon-specific form data.
+     *
+     * @param array $data submitted values
+     * @param array $files uploaded files
+     * @return array
+     */
     public function validation(array $data, array $files): array {
         return [];
     }
 
+    /**
+     * Resolve the bnx identifier for a module.
+     *
+     * @param int $moduleid module identifier
+     * @return int|null
+     */
     private function get_bnx_id(int $moduleid): ?int {
         global $DB;
 
