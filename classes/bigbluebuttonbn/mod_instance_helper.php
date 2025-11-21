@@ -24,7 +24,8 @@
 
 namespace bbbext_bnx\bigbluebuttonbn;
 
-use bbbext_bnx\local\service\bnx_settings_service;
+use bbbext_bnx\local\services\bnx_settings_service;
+use bbbext_bnx\local\services\bnx_settings_service_interface;
 use stdClass;
 
 /**
@@ -56,15 +57,15 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
 
     /**
      * Service handling persistence of bnx settings.
-     * @var bnx_settings_service
+     * @var bnx_settings_service_interface
      */
-    private bnx_settings_service $service;
+    private bnx_settings_service_interface $service;
 
     /**
      * Initialise the helper with a settings service instance.
      */
-    public function __construct() {
-        $this->service = new bnx_settings_service();
+    public function __construct(?bnx_settings_service_interface $service = null) {
+        $this->service = $service ?? bnx_settings_service::get_service();
     }
 
     /**

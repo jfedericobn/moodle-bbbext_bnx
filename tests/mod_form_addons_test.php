@@ -26,7 +26,7 @@
 namespace bbbext_bnx;
 
 use bbbext_bnx\bigbluebuttonbn\mod_form_addons;
-use bbbext_bnx\local\service\bnx_settings_service;
+use bbbext_bnx\local\services\bnx_settings_service;
 
 /**
  * Tests for the BNX mod_form_addons hooks.
@@ -63,7 +63,7 @@ final class mod_form_addons_test extends \advanced_testcase {
         $module = $this->create_bigbluebutton_activity();
         $bnxid = $this->ensure_bnx_record($module->id);
 
-        $service = new bnx_settings_service();
+        $service = bnx_settings_service::get_service();
         $service->set_settings($bnxid, ['enablecam' => 1]);
 
         $defaults = ['id' => $module->id];

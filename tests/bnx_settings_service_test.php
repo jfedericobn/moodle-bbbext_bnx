@@ -24,7 +24,7 @@
 
 namespace bbbext_bnx;
 
-use bbbext_bnx\local\service\bnx_settings_service;
+use bbbext_bnx\local\services\bnx_settings_service;
 
 /**
  * Unit tests for the BNX settings service.
@@ -33,7 +33,7 @@ use bbbext_bnx\local\service\bnx_settings_service;
  * @copyright 2025 onwards, Blindside Networks Inc
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
- * @covers    \bbbext_bnx\local\service\bnx_settings_service
+ * @covers    \bbbext_bnx\local\services\bnx_settings_service
  */
 final class bnx_settings_service_test extends \advanced_testcase {
     /** @var bnx_settings_service */
@@ -54,7 +54,7 @@ final class bnx_settings_service_test extends \advanced_testcase {
         parent::setUp();
         $this->resetAfterTest(true);
 
-        $this->service = new bnx_settings_service();
+        $this->service = bnx_settings_service::get_service();
         $this->bnxid = $this->create_bnx_record();
         $this->service->delete_settings($this->bnxid);
     }

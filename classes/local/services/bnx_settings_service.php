@@ -23,7 +23,7 @@
  * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
  */
 
-namespace bbbext_bnx\local\service;
+namespace bbbext_bnx\local\services;
 
 /**
  * Service wrapper for BNX settings persistence.
@@ -33,7 +33,36 @@ namespace bbbext_bnx\local\service;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
  */
-class bnx_settings_service {
+class bnx_settings_service implements bnx_settings_service_interface {
+    /**
+     * Cached instance for factory.
+     *
+     * @var self|null
+     */
+    protected static $service = null;
+
+    /**
+     * Get the shared service instance (factory).
+     *
+     * @return self
+     */
+    public static function get_service(): self {
+        if (self::$service === null) {
+            self::$service = new self();
+        }
+        return self::$service;
+    }
+
+    /**
+     * Test hook to override the service instance.
+     *
+     * @param self|null $svc
+     * @return void
+     */
+    public static function set_service(self $svc = null): void {
+        self::$service = $svc;
+    }
+
     /**
      * Table storing bnx extension settings.
      */
@@ -48,14 +77,14 @@ class bnx_settings_service {
      * Fetch settings for a BNX record.
      *
      * @param int $bnxid bnx parent record identifier
-     * @return array<string, int>
+     * @return array<string, string>
      */
     public function get_settings(int $bnxid): array {
         global $DB;
-        $records = $DB->get_records(self::BNX_SETTINGS_TABLE, ['bnxid' => $bnxid], 'setting ASC', 'setting, value');
+        $records = $DB->get_records(self::BNX_SETTINGS_TABLE, ['bnxid' => $bnxid], 'name ASC', 'name, value');
         $result = [];
         foreach ($records as $record) {
-            $result[$record->setting] = (int)$record->value;
+            $result[$record->name] = (string)$record->value;
         }
         return $result;
     }
@@ -65,16 +94,16 @@ class bnx_settings_service {
      *
      * @param int $bnxid bnx parent record identifier
      * @param string $name setting name
-     * @return int|null
+     * @return string|null
      */
-    public function get_setting(int $bnxid, string $name): ?int {
+    public function get_setting(int $bnxid, string $name): ?string {
         global $DB;
         $record = $DB->get_record(self::BNX_SETTINGS_TABLE, [
             'bnxid' => $bnxid,
-            'setting' => $name,
+            'name' => $name,
         ], 'value', IGNORE_MISSING);
 
-        return $record ? (int)$record->value : null;
+        return $record ? (string)$record->value : null;
     }
 
     /**
@@ -82,9 +111,9 @@ class bnx_settings_service {
      *
      * @param int $moduleid module identifier
      * @param string $name setting name
-     * @return int|null
+     * @return string|null
      */
-    public function get_setting_for_module(int $moduleid, string $name): ?int {
+    public function get_setting_for_module(int $moduleid, string $name): ?string {
         $bnxid = $this->get_bnx_id_for_module($moduleid);
         if ($bnxid === null) {
             return null;
@@ -125,7 +154,7 @@ class bnx_settings_service {
         global $DB;
         $DB->delete_records(self::BNX_SETTINGS_TABLE, [
             'bnxid' => $bnxid,
-            'setting' => $name,
+            'name' => $name,
         ]);
     }
 
@@ -138,19 +167,20 @@ class bnx_settings_service {
      */
     private function set_setting(int $bnxid, string $name, $value): void {
         global $DB;
+        // Normalize to a string so we can store arbitrary data.
         $normalised = $this->normalise_value($value);
         $now = time();
 
         $record = $DB->get_record(self::BNX_SETTINGS_TABLE, [
             'bnxid' => $bnxid,
-            'setting' => $name,
+            'name' => $name,
         ]);
 
         if ($record) {
-            if ((int)$record->value === $normalised) {
+            if ((string)$record->value === (string)$normalised) {
                 return;
             }
-            $record->value = $normalised;
+            $record->value = (string)$normalised;
             $record->timemodified = $now;
             $DB->update_record(self::BNX_SETTINGS_TABLE, $record);
             return;
@@ -158,8 +188,8 @@ class bnx_settings_service {
 
         $DB->insert_record(self::BNX_SETTINGS_TABLE, (object) [
             'bnxid' => $bnxid,
-            'setting' => $name,
-            'value' => $normalised,
+            'name' => $name,
+            'value' => (string)$normalised,
             'timemodified' => $now,
         ]);
     }
@@ -178,18 +208,25 @@ class bnx_settings_service {
     }
 
     /**
-     * Normalise incoming values so they match the schema.
+     * Normalise incoming values so they match the schema. Returns string.
      *
      * @param mixed $value raw value
-     * @return int
+     * @return string
      */
-    private function normalise_value($value): int {
+    private function normalise_value($value): string {
+        if (is_string($value)) {
+            return $value;
+        }
         if (is_bool($value)) {
-            return $value ? 1 : 0;
+            return $value ? '1' : '0';
         }
         if (is_numeric($value)) {
-            return (int)$value;
+            return (string)((int)$value);
         }
-        return empty($value) ? 0 : 1;
+        // Fallback: JSON-encode arrays/objects, or cast to string.
+        if (is_array($value) || is_object($value)) {
+            return json_encode($value);
+        }
+        return (string)$value;
     }
 }

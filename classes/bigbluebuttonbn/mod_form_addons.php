@@ -24,7 +24,8 @@
 
 namespace bbbext_bnx\bigbluebuttonbn;
 
-use bbbext_bnx\local\service\bnx_settings_service;
+use bbbext_bnx\local\services\bnx_settings_service;
+use bbbext_bnx\local\services\bnx_settings_service_interface;
 use stdClass;
 
 /**
@@ -38,9 +39,9 @@ use stdClass;
 class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addons {
     /**
      * Service used to fetch and persist settings.
-     * @var bnx_settings_service
+     * @var bnx_settings_service_interface
      */
-    private bnx_settings_service $service;
+    private bnx_settings_service_interface $service;
 
     /**
      * Construct the addon wrapper around the Moodle form.
@@ -49,9 +50,9 @@ class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addo
      * @param stdClass|null $bigbluebuttonbndata existing module data
      * @param string|null $suffix suffix used when the form fieldset is duplicated
      */
-    public function __construct(\MoodleQuickForm &$mform, ?stdClass $bigbluebuttonbndata = null, ?string $suffix = null) {
+    public function __construct(\MoodleQuickForm &$mform, ?stdClass $bigbluebuttonbndata = null, ?string $suffix = null, ?bnx_settings_service_interface $service = null) {
         parent::__construct($mform, $bigbluebuttonbndata, $suffix);
-        $this->service = new bnx_settings_service();
+        $this->service = $service ?? bnx_settings_service::get_service();
     }
 
     /**

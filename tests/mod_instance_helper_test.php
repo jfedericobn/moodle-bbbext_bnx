@@ -26,7 +26,7 @@
 namespace bbbext_bnx;
 
 use bbbext_bnx\bigbluebuttonbn\mod_instance_helper;
-use bbbext_bnx\local\service\bnx_settings_service;
+use bbbext_bnx\local\services\bnx_settings_service;
 
 /**
  * Tests for the BNX mod_instance_helper lifecycle hooks.
@@ -70,7 +70,7 @@ final class mod_instance_helper_test extends \advanced_testcase {
             'enablemic' => 0,
         ]);
 
-        $service = new bnx_settings_service();
+        $service = bnx_settings_service::get_service();
         $settings = $service->get_settings($bnxid);
 
         $this->assertSame(1, $settings['enablecam']);
@@ -89,7 +89,7 @@ final class mod_instance_helper_test extends \advanced_testcase {
         $helper = new mod_instance_helper();
 
         $bnxid = $this->ensure_bnx_record($module->id);
-        $service = new bnx_settings_service();
+        $service = bnx_settings_service::get_service();
         $service->set_settings($bnxid, ['enablecam' => 0]);
 
         $helper->update_instance((object) [
