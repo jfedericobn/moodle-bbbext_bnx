@@ -29,9 +29,6 @@ namespace bbbext_bnx\local\services;
  * Service wrapper for BNX settings persistence.
  *
  * @package   bbbext_bnx
- * @copyright 2025 onwards, Blindside Networks Inc
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
  */
 class bnx_settings_service implements bnx_settings_service_interface {
     /**
