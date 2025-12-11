@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Base BNX view-page override that mirrors the core BigBlueButtonBN output.
+ * View Page template renderable.
  *
  * @package   bbbext_bnx
  * @copyright 2025 onwards, Blindside Networks Inc
@@ -25,14 +25,41 @@
 
 namespace bbbext_bnx\bigbluebuttonbn;
 
+use mod_bigbluebuttonbn\instance;
+use renderer_base;
+use stdClass;
+use bbbext_bnx\local\bigbluebutton\view\page_context_builder;
+
 /**
- * BNX view override scaffold delegating to the core implementation.
- *
- * This class exists purely to hook the BNX framework into the standard
- * BigBlueButtonBN view output without changing its behaviour.
+ * BNX view override that embeds the enhanced recordings experience.
  *
  * @package   bbbext_bnx
  */
 class view_page_addons extends \mod_bigbluebuttonbn\local\extension\view_page_addons {
-    // The BNX extension reuses the core view behaviour without customisation for now.
+    /** @var instance */
+    protected $instance;
+
+    /**
+     * Construct the renderable for a specific instance.
+     *
+     * @param instance $instance BigBlueButton instance being rendered.
+     */
+    public function __construct(instance $instance) {
+        $this->instance = $instance;
+    }
+
+    /**
+     * Build the template context for the BNX view.
+     *
+     * @param renderer_base $output
+     * @return stdClass
+     */
+    public function export_for_template(renderer_base $output): stdClass {
+        global $PAGE;
+
+        $modrenderer = $PAGE->get_renderer('mod_bigbluebuttonbn');
+        $builder = new page_context_builder($this->instance, $output, $modrenderer);
+
+        return $builder->build();
+    }
 }

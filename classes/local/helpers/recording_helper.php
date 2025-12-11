@@ -15,19 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for BigBlueButton BN Experience
+ * Legacy helper placeholder for backwards compatibility.
  *
- * @package   bbbext_bnx
- * @copyright 2025 onwards, Blindside Networks Inc
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @author    Jesus Federico  (jesus [at] blindsidenetworks [dt] com)
+ * @package    bbbext_bnx
+ * @copyright  2025 onwards, Blindside Networks Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->component    = 'bbbext_bnx';
-$plugin->release      = '0.1.0-alpha.3';
-$plugin->version      = 2025121000;
-$plugin->requires     = 2025100600; // Moodle 5.1.0 minimum.
-$plugin->supported    = [501, 502];
-$plugin->maturity     = MATURITY_ALPHA;
+// Intentionally left blank; legacy helper retained for backwards compatibility.
