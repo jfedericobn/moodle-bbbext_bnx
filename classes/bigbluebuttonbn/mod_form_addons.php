@@ -118,7 +118,7 @@ class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addo
      * @return void
      */
     public function add_fields(): void {
-        // Parent BNX plugin does not expose additional form controls yet.
+        // A nav label override is handled globally via hook_callbacks::before_footer().
     }
 
     /**
