@@ -255,8 +255,28 @@ const initPreviewEnhancements = () => {
             }
         };
 
+        let closeTimer = null;
+
+        const scheduleClose = () => {
+            if (closeTimer) {
+                return;
+            }
+            closeTimer = setTimeout(() => {
+                closeTimer = null;
+                closePreviews();
+            }, 120);
+        };
+
+        const cancelClose = () => {
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+        };
+
         toggleButton.addEventListener('click', (event) => {
             event.preventDefault();
+            cancelClose();
             if (extraWrapper.classList.contains('d-none')) {
                 openPreviews();
             } else {
@@ -266,18 +286,26 @@ const initPreviewEnhancements = () => {
 
         toggleButton.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
+                cancelClose();
                 closePreviews();
             }
         });
 
         [primaryThumbnail, toggleButton].forEach((element) => {
-            element.addEventListener('mouseenter', openPreviews);
-            element.addEventListener('focus', openPreviews);
+            element.addEventListener('mouseenter', () => {
+                cancelClose();
+                openPreviews();
+            });
+            element.addEventListener('focus', () => {
+                cancelClose();
+                openPreviews();
+            });
         });
 
-        container.addEventListener('mouseleave', closePreviews);
+        parentRow.addEventListener('mouseenter', cancelClose);
+        parentRow.addEventListener('mouseleave', scheduleClose);
         container.addEventListener('focusout', (event) => {
-            if (!container.contains(event.relatedTarget)) {
+            if (!parentRow.contains(event.relatedTarget)) {
                 closePreviews();
             }
         });
