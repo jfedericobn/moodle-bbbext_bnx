@@ -87,6 +87,10 @@ class page_context_builder {
             );
         }
 
+        global $USER, $CFG;
+        $lang = $USER->lang ?? $CFG->lang ?? 'en';
+        $context->bnxalerts = sidecar_helper::render_room_alerts($lang);
+
         return $context;
     }
 
@@ -140,11 +144,13 @@ class page_context_builder {
             return '';
         }
 
+        $groupselectionwarning = '';
         if (count($groups) > 1) {
-            \core\notification::add(
+            $groupselectionwarning = $this->output->render(new notification(
                 get_string('view_groups_selection_warning', 'bigbluebuttonbn'),
-                \core\output\notification::NOTIFY_INFO
-            );
+                notification::NOTIFY_INFO,
+                false
+            ));
         }
 
         // For Separate Groups mode, hide "All Participants" for everyone (including teachers/admins).
@@ -158,7 +164,7 @@ class page_context_builder {
             $hideallparticipants
         );
 
-        return $groupsmenu . '<br><br>';
+        return $groupselectionwarning . $groupsmenu . '<br><br>';
     }
 
     /**
