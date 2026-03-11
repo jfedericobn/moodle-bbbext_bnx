@@ -121,8 +121,10 @@ class recording_row_actionbar extends base_recording_row_actionbar {
      */
     private function get_actionbar_label(string $action): string {
         $key = 'view_recording_list_actionbar_' . $action;
-        if (in_array($action, ['publish', 'unpublish'], true)
-            && get_string_manager()->string_exists($key, 'bbbext_bnx')) {
+        if (
+            in_array($action, ['publish', 'unpublish'], true)
+            && get_string_manager()->string_exists($key, 'bbbext_bnx')
+        ) {
             return get_string($key, 'bbbext_bnx');
         }
 
