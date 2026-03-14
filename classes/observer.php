@@ -60,7 +60,7 @@ class observer {
      * React to subplugin state changes via generic callback discovery.
      *
      * When any bbbext subplugin is enabled, this observer checks whether the
-     * plugin defines a {@see \<plugin>\plugininfo_callbacks::on_enable()} method
+     * plugin defines a `\<plugin>\plugininfo_callbacks::on_enable()` method
      * and invokes it. This allows each sidecar to declare its own enable-time
      * behaviour without requiring changes to the parent plugin.
      *

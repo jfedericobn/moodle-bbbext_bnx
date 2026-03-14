@@ -21,7 +21,7 @@ namespace bbbext_bnx;
  *
  * The parent plugin (bbbext_bnx) uses a generic callback discovery pattern:
  * when any bbbext subplugin is enabled, it checks for a
- * {@see \<plugin>\plugininfo_callbacks::on_enable()} method and invokes it.
+ * `\<plugin>\plugininfo_callbacks::on_enable()` method and invokes it.
  * These tests verify that mechanism without referencing specific sidecars.
  *
  * @package   bbbext_bnx
@@ -33,7 +33,7 @@ final class subplugin_state_test extends \advanced_testcase {
     /**
      * Enabling a subplugin that defines plugininfo_callbacks::on_enable() must invoke it.
      *
-     * Uses bnx_preuploads as a concrete example, but the observer logic is generic.
+     * Uses a test stub as a concrete example; the observer logic is generic.
      *
      * @covers \bbbext_bnx\observer::subplugin_config_log_created
      * @return void
@@ -41,14 +41,16 @@ final class subplugin_state_test extends \advanced_testcase {
     public function test_enabling_subplugin_invokes_on_enable_callback(): void {
         $this->resetAfterTest(true);
 
-        set_config('bigbluebuttonbn_preuploadpresentation_editable', 0);
-        $this->assertSame(0, (int) get_config(null, 'bigbluebuttonbn_preuploadpresentation_editable'));
+        require_once(__DIR__ . '/fixtures/stub_plugininfo_callbacks.php');
+
+        unset_config('bbbext_bnx_teststub_on_enable_called');
+        $this->assertFalse(get_config(null, 'bbbext_bnx_teststub_on_enable_called'));
 
         $event = \core\event\config_log_created::create([
             'context' => \context_system::instance(),
             'other' => [
                 'name'      => 'disabled',
-                'plugin'    => 'bbbext_bnx_preuploads',
+                'plugin'    => 'bbbext_bnx_teststub',
                 'oldvalue'  => '1',
                 'value'     => '0',
             ],
@@ -56,7 +58,7 @@ final class subplugin_state_test extends \advanced_testcase {
 
         observer::subplugin_config_log_created($event);
 
-        $this->assertSame(1, (int) get_config(null, 'bigbluebuttonbn_preuploadpresentation_editable'));
+        $this->assertSame(1, (int) get_config(null, 'bbbext_bnx_teststub_on_enable_called'));
     }
 
     /**
@@ -68,13 +70,15 @@ final class subplugin_state_test extends \advanced_testcase {
     public function test_disabling_subplugin_does_not_invoke_callback(): void {
         $this->resetAfterTest(true);
 
-        set_config('bigbluebuttonbn_preuploadpresentation_editable', 1);
+        require_once(__DIR__ . '/fixtures/stub_plugininfo_callbacks.php');
+
+        unset_config('bbbext_bnx_teststub_on_enable_called');
 
         $event = \core\event\config_log_created::create([
             'context' => \context_system::instance(),
             'other' => [
                 'name'      => 'disabled',
-                'plugin'    => 'bbbext_bnx_preuploads',
+                'plugin'    => 'bbbext_bnx_teststub',
                 'oldvalue'  => '0',
                 'value'     => '1',
             ],
@@ -82,8 +86,8 @@ final class subplugin_state_test extends \advanced_testcase {
 
         observer::subplugin_config_log_created($event);
 
-        // Setting must be untouched when the plugin is being disabled.
-        $this->assertSame(1, (int) get_config(null, 'bigbluebuttonbn_preuploadpresentation_editable'));
+        // Callback must NOT have been invoked when the plugin is being disabled.
+        $this->assertFalse(get_config(null, 'bbbext_bnx_teststub_on_enable_called'));
     }
 
     /**
