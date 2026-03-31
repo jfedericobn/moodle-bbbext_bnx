@@ -41,4 +41,26 @@ class joinurl_helper {
             'bn' => $instance->get_instance_id(),
         ]);
     }
+
+    /**
+     * Build a moodle_url pointing to the subplugin guest handler.
+     *
+     * @param core_instance $instance
+     * @return moodle_url
+     */
+    public static function build_guest_join_url(core_instance $instance): moodle_url {
+        global $DB;
+
+        // Ensure credentials exist before reading the UID from the instance record.
+        $instance->get_guest_access_url();
+        $guestlinkuid = $DB->get_field('bigbluebuttonbn', 'guestlinkuid', ['id' => $instance->get_instance_id()]);
+
+        if (empty($guestlinkuid)) {
+            return $instance->get_guest_access_url();
+        }
+
+        return new moodle_url('/mod/bigbluebuttonbn/extension/bnx/guest.php', [
+            'uid' => $guestlinkuid,
+        ]);
+    }
 }

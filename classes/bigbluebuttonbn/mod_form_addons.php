@@ -25,9 +25,11 @@
 
 namespace bbbext_bnx\bigbluebuttonbn;
 
+use bbbext_bnx\local\helpers\joinurl_helper;
 use bbbext_bnx\local\helpers\mod_form_helper;
 use bbbext_bnx\local\services\bnx_settings_service;
 use bbbext_bnx\local\services\bnx_settings_service_interface;
+use mod_bigbluebuttonbn\instance;
 use stdClass;
 
 /**
@@ -127,6 +129,11 @@ class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addo
             'room',
             get_string('mod_form_block_room', 'bbbext_bnx')
         );
+
+        if (!empty($this->bigbluebuttonbndata->id) && $this->mform->elementExists('guestjoinurl')) {
+            $instance = instance::get_from_instanceid((int)$this->bigbluebuttonbndata->id);
+            $this->mform->setDefault('guestjoinurl', joinurl_helper::build_guest_join_url($instance)->out(false));
+        }
 
         // Check if the feature is editable.
         $editable = mod_form_helper::is_feature_editable('approvalbeforejoin');
