@@ -16,6 +16,7 @@
 
 namespace bbbext_bnx\external;
 
+use bbbext_bnx\local\helpers\joinurl_helper;
 use bbbext_bnx\local\helpers\ui_string_helper;
 use core_external\external_single_structure;
 use core_external\external_value;
@@ -65,7 +66,7 @@ class get_meeting_info extends \mod_bigbluebuttonbn\external\meeting_info {
             $result['showpresentations'] = $meetinginfo['showpresentations'];
         }
         if (array_key_exists('guestjoinurl', $meetinginfo)) {
-            $result['guestjoinurl'] = $meetinginfo['guestjoinurl'];
+            $result['guestjoinurl'] = joinurl_helper::build_guest_join_url($instance)->out(false);
         }
         if (array_key_exists('guestpassword', $meetinginfo)) {
             $result['guestpassword'] = $meetinginfo['guestpassword'];

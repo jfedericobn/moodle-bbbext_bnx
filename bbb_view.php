@@ -125,7 +125,6 @@ switch (strtolower($action)) {
         // We should never reach this point.
         break;
 }
-
 // When we reach this point, we can close the tab or window where BBB was opened.
 echo $OUTPUT->header();
 // Behat does not like when we close the Windows as it is expecting to locate
