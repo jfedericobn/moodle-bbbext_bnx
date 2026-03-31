@@ -63,5 +63,4 @@ class joinurl_helper {
             'uid' => $guestlinkuid,
         ]);
     }
-
 }

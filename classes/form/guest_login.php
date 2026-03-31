@@ -39,8 +39,11 @@ class guest_login extends \moodleform {
 		global $USER;
 
 		$mform = $this->_form;
-		$mform->addElement('text', 'username',
-			get_string('guestaccess_username', 'mod_bigbluebuttonbn'));
+		$mform->addElement(
+			'text',
+			'username',
+			get_string('guestaccess_username', 'mod_bigbluebuttonbn')
+		);
 		$mform->setType('username', PARAM_NOTAGS);
 
 		if (isloggedin() && !isguestuser()) {
@@ -56,15 +59,26 @@ class guest_login extends \moodleform {
 			);
 		}
 
-		$mform->addElement('password', 'password',
-			get_string('guestaccess_password', 'mod_bigbluebuttonbn'));
+		$mform->addElement(
+			'password',
+			'password',
+			get_string('guestaccess_password', 'mod_bigbluebuttonbn')
+		);
 		$mform->setType('password', PARAM_RAW);
-		$mform->addRule('password',
-			get_string('required'), 'required', null, 'client');
+		$mform->addRule(
+			'password',
+			get_string('required'),
+			'required',
+			null,
+			'client'
+		);
 		$mform->addElement('hidden', 'uid', $this->_customdata['uid']);
 		$mform->setType('uid', PARAM_ALPHANUMEXT);
 
-		$this->add_action_buttons(false, get_string('guestaccess_join_meeting', 'mod_bigbluebuttonbn'));
+		$this->add_action_buttons(
+			false,
+			get_string('guestaccess_join_meeting', 'mod_bigbluebuttonbn')
+		);
 	}
 
 	/**

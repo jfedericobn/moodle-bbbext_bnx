@@ -28,6 +28,8 @@ use mod_bigbluebuttonbn\local\exceptions\server_not_available_exception;
 use mod_bigbluebuttonbn\local\proxy\bigbluebutton_proxy;
 use mod_bigbluebuttonbn\meeting;
 
+// We should not have any require_login in this file as it is a guest entrypoint.
+// phpcs:disable moodle.Files.RequireLogin.Missing
 require(__DIR__ . '/../../../../config.php');
 
 global $PAGE, $OUTPUT, $DB, $SITE;
