@@ -52,6 +52,24 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->set_pagelayout('standard');
 
+$reason = optional_param('reason', '', PARAM_TEXT);
+$errors = optional_param('errors', '', PARAM_RAW);
+
+// BBB appends reason/errors when ending the session; in that case we only need to auto-close this tab.
+if ($reason !== '' || $errors !== '') {
+    echo $OUTPUT->header();
+    if (!defined('BEHAT_SITE_RUNNING')) {
+        $PAGE->requires->js_call_amd('mod_bigbluebuttonbn/rooms', 'setupWindowAutoClose');
+    }
+    echo html_writer::div(get_string('view_message_tab_close', 'mod_bigbluebuttonbn'));
+    echo html_writer::div(html_writer::link(
+        new moodle_url('/mod/bigbluebuttonbn/extension/bnx/guest.php', ['uid' => $uid]),
+        get_string('guestaccess_meeting_link', 'mod_bigbluebuttonbn')
+    ));
+    echo $OUTPUT->footer();
+    exit;
+}
+
 $form = new guest_login(null, ['uid' => $uid, 'instance' => $instance]);
 if (defined('BEHAT_SITE_RUNNING')) {
     $form->set_data(['password' => optional_param('password', '', PARAM_RAW)]);
@@ -73,6 +91,22 @@ if ($data = $form->get_data()) {
     } catch (server_not_available_exception $e) {
         bigbluebutton_proxy::handle_server_not_available($instance);
     }
+}
+
+if (!defined('BEHAT_SITE_RUNNING')) {
+    // Open the join flow in a script-opened child window so logout auto-close is permitted by browsers.
+    $PAGE->requires->js_init_code(
+        "(function() {
+            var form = document.querySelector('form.mform');
+            if (!form) {
+                return;
+            }
+            form.addEventListener('submit', function() {
+                window.open('', 'bigbluebutton_conference');
+                form.setAttribute('target', 'bigbluebutton_conference');
+            });
+        })();"
+    );
 }
 
 echo $OUTPUT->header();
