@@ -1,3 +1,9 @@
+1.0.1 (April 1, 2026)
+- Adds a BNX-specific guest access endpoint (guest.php) with its own join form, URL builder, and logout redirect flow, replacing the core guest page in BNX contexts (GIT-1).
+- Hides BBB server setup instructions in the activity settings when credentials are pre-configured (MD-98).
+- Improves recordings table UX (MD-94).
+- Supports auto-set default settings decoupled from sidecars (MD-95, MD-97).
+
 1.0 (March 11, 2026)
 - First stable open-source release of bbbext_bnx.
 - Introduces the BNX Framework: BigBlueButton BN Experience is a foundational UX enhancement extension for BigBlueButton in Moodle, featuring moderator approval workflows and shared capabilities that power the BNX extension family.

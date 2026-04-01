@@ -32,16 +32,12 @@
 function xmldb_bbbext_bnx_upgrade($oldversion) {
     global $DB;
 
-    if ($oldversion < 2026031301) {
+    if ($oldversion < 2026031101) {
         // Ensure BigBlueButtonBN module is enabled for already-installed BNX sites.
         if ($DB->record_exists('modules', ['name' => 'bigbluebuttonbn'])) {
             \core\plugininfo\mod::enable_plugin('bigbluebuttonbn', 1);
         }
 
-        upgrade_plugin_savepoint(true, 2026031301, 'bbbext', 'bnx');
-    }
-
-    if ($oldversion < 2026031304) {
         $plugins = \core_plugin_manager::instance()->get_installed_plugins('bbbext');
         if ($plugins) {
             foreach ($plugins as $name => $version) {
@@ -57,7 +53,7 @@ function xmldb_bbbext_bnx_upgrade($oldversion) {
             }
         }
 
-        upgrade_plugin_savepoint(true, 2026031304, 'bbbext', 'bnx');
+        upgrade_plugin_savepoint(true, 2026031101, 'bbbext', 'bnx');
     }
 
     return true;
