@@ -68,7 +68,7 @@ class mod_form_helper {
      * Apply header label overrides using language string keys.
      *
      * @param \MoodleQuickForm $mform The form instance
-        * @param array $headerstringoverrides header name => lang string key
+     * @param array $headerstringoverrides header name => lang string key
      * @param string $component Language component for string lookup
      * @return void
      */
