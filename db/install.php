@@ -33,6 +33,8 @@
 function xmldb_bbbext_bnx_install() {
     global $DB;
 
+    require_once(__DIR__ . '/migration.php');
+
     // Enable the plugin by default.
     set_config('enabled', 1, 'bbbext_bnx');
 
@@ -40,4 +42,7 @@ function xmldb_bbbext_bnx_install() {
     if ($DB->record_exists('modules', ['name' => 'bigbluebuttonbn'])) {
         \core\plugininfo\mod::enable_plugin('bigbluebuttonbn', 1);
     }
+
+    // Migrate legacy BN Reminders data/settings and disable bnreminders if present.
+    bbbext_bnx_migrate_bnreminders_data();
 }
