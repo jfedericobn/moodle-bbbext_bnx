@@ -51,9 +51,33 @@ class observer {
         if (!$bnxdisabled) {
             // Ensure BigBlueButtonBN module is enabled when BNX is enabled.
             mod::enable_plugin('bigbluebuttonbn', 1);
+
+            // BNX owns reminders when enabled; force-disable legacy bnreminders.
+            self::disable_bnreminders_if_enabled();
         }
 
         sidecar_state_manager::apply_for_bnx_state($bnxdisabled);
+    }
+
+    /**
+     * Disable bnreminders if it is currently enabled.
+     *
+     * @return void
+     */
+    private static function disable_bnreminders_if_enabled(): void {
+        $bnreminders = \core_plugin_manager::instance()->get_plugin_info('bbbext_bnreminders');
+        if (!$bnreminders || !$bnreminders->is_enabled()) {
+            return;
+        }
+
+        $oldvalue = get_config('bbbext_bnreminders', 'disabled');
+        if (!empty($oldvalue)) {
+            return;
+        }
+
+        set_config('disabled', 1, 'bbbext_bnreminders');
+        add_to_config_log('disabled', $oldvalue, 1, 'bbbext_bnreminders');
+        \core_plugin_manager::reset_caches();
     }
 
     /**
