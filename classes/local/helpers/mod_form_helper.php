@@ -16,6 +16,7 @@
 
 namespace bbbext_bnx\local\helpers;
 
+use bbbext_bnx\bigbluebuttonbn\mod_instance_helper;
 use bbbext_bnx\reminders_utils;
 use pix_icon;
 
@@ -28,6 +29,20 @@ use pix_icon;
  * @author    Shamiso Jaravaza (shamiso [dt] jaravaza [at] blindsidenetworks [dt] com)
  */
 class mod_form_helper {
+    /**
+     * Core lock elements replaced by BNX lock settings.
+     */
+    private const CORE_LOCK_ELEMENTS = [
+        'lock',
+        'disablecam',
+        'disablemic',
+        'disableprivatechat',
+        'disablepublicchat',
+        'disablenote',
+        'hideuserlist',
+        'no_locksettings',
+    ];
+
     /**
      * Add the approval before join form checkbox.
      *
@@ -120,6 +135,63 @@ class mod_form_helper {
         if ($mform->elementExists($name)) {
             $mform->removeElement($name);
         }
+    }
+
+    /**
+     * Remove the core lock settings so BNX can replace them.
+     *
+     * @param \MoodleQuickForm $mform The form instance
+     * @return void
+     */
+    public static function remove_lock_settings_elements(\MoodleQuickForm &$mform): void {
+        foreach (self::CORE_LOCK_ELEMENTS as $elementname) {
+            self::remove_element($mform, $elementname);
+        }
+    }
+
+    /**
+     * Add BNX-managed lock settings fields to the activity form.
+     *
+     * @param \MoodleQuickForm $mform The form instance
+     * @return void
+     */
+    public static function add_lock_settings_fields(\MoodleQuickForm &$mform): void {
+        $mform->addElement('header', 'bnxlocksettings', get_string('mod_form_locksettings', 'bbbext_bnx'));
+        $mform->addElement('static', 'bnxlocksettings_desc', '', get_string('mod_form_locksettings_desc', 'bbbext_bnx'));
+
+        foreach (mod_instance_helper::LOCK_FEATURE_DEFINITIONS as $feature => $definition) {
+            $fieldname = $definition['field'];
+            $default = self::get_feature_default($feature);
+
+            if (self::is_feature_editable($feature)) {
+                self::add_checkbox_field($mform, $fieldname, $definition['string'], $default);
+                continue;
+            }
+
+            $mform->addElement('hidden', $fieldname, $default);
+            $mform->setType($fieldname, PARAM_INT);
+            $mform->setDefault($fieldname, $default);
+        }
+    }
+
+    /**
+     * Helper method to add a checkbox element to the form.
+     *
+     * @param \MoodleQuickForm $mform The form instance
+     * @param string $name The name of the checkbox.
+     * @param string $string The string key for the field.
+     * @param int $default The default value for the checkbox.
+     * @return void
+     */
+    public static function add_checkbox_field(
+        \MoodleQuickForm &$mform,
+        string $name,
+        string $string,
+        int $default
+    ): void {
+        $mform->addElement('checkbox', $name, get_string($string, 'bbbext_bnx'));
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, $default);
     }
 
     /**

@@ -67,6 +67,210 @@ function bbbext_bnx_migrate_bnreminders_data(): void {
 }
 
 /**
+ * Migrate legacy BNX lock settings admin config into BNX and disable the sidecar.
+ *
+ * @return void
+ */
+function bbbext_bnx_migrate_bnx_locksettings_data(): void {
+    if (!bbbext_bnx_has_legacy_bnx_locksettings_data()) {
+        return;
+    }
+
+    $component = 'bbbext_bnx_locksettings';
+    $configkeys = [
+        'cam_default',
+        'cam_editable',
+        'mic_default',
+        'mic_editable',
+        'publicchat_default',
+        'publicchat_editable',
+        'privatechat_default',
+        'privatechat_editable',
+        'notes_default',
+        'notes_editable',
+        'userlist_default',
+        'userlist_editable',
+        'hideviewerscursor_default',
+        'hideviewerscursor_editable',
+    ];
+
+    foreach ($configkeys as $configname) {
+        $oldvalue = get_config($component, $configname);
+        if ($oldvalue === false) {
+            continue;
+        }
+
+        set_config($configname, $oldvalue, 'bbbext_bnx');
+    }
+
+    $oldvalue = get_config($component, 'disabled');
+    if (empty($oldvalue)) {
+        set_config('disabled', 1, $component);
+        if (function_exists('add_to_config_log')) {
+            add_to_config_log('disabled', $oldvalue, 1, $component);
+        }
+        \core_plugin_manager::reset_caches();
+    }
+}
+
+/**
+ * Migrate core BigBlueButton lock settings into BNX lock settings.
+ *
+ * This migration runs once and maps core "disable/hide" semantics to BNX
+ * "enable/show" semantics for both admin defaults and existing activities.
+ *
+ * @return void
+ */
+function bbbext_bnx_migrate_core_locksettings_data(): void {
+    if ((int)get_config('bbbext_bnx', 'locksettings_core_migrated') === 1) {
+        return;
+    }
+
+    bbbext_bnx_migrate_core_locksettings_admin_config();
+    bbbext_bnx_migrate_core_locksettings_instance_settings();
+
+    set_config('locksettings_core_migrated', 1, 'bbbext_bnx');
+}
+
+/**
+ * Migrate core lock admin defaults/editability into BNX config.
+ *
+ * @return void
+ */
+function bbbext_bnx_migrate_core_locksettings_admin_config(): void {
+    $mapping = [
+        'cam' => ['core' => 'disablecam', 'invertdefault' => true],
+        'mic' => ['core' => 'disablemic', 'invertdefault' => true],
+        'privatechat' => ['core' => 'disableprivatechat', 'invertdefault' => true],
+        'publicchat' => ['core' => 'disablepublicchat', 'invertdefault' => true],
+        'notes' => ['core' => 'disablenote', 'invertdefault' => true],
+        'userlist' => ['core' => 'hideuserlist', 'invertdefault' => true],
+    ];
+
+    foreach ($mapping as $bnxfeature => $meta) {
+        $defaultkey = $bnxfeature . '_default';
+        $coredefaultvalue = get_config('mod_bigbluebuttonbn', $meta['core'] . '_default');
+        if ($coredefaultvalue === false) {
+            $coredefaultvalue = get_config('bigbluebuttonbn', $meta['core'] . '_default');
+        }
+        if ($coredefaultvalue === false) {
+            $coredefaultvalue = \mod_bigbluebuttonbn\local\config::get($meta['core'] . '_default');
+        }
+
+        $coredefault = (int)!empty($coredefaultvalue);
+        $bnxdefault = !empty($meta['invertdefault']) ? (int)!$coredefault : $coredefault;
+        set_config($defaultkey, $bnxdefault, 'bbbext_bnx');
+
+        $editablekey = $bnxfeature . '_editable';
+        $coreeditablevalue = get_config('mod_bigbluebuttonbn', $meta['core'] . '_editable');
+        if ($coreeditablevalue === false) {
+            $coreeditablevalue = get_config('bigbluebuttonbn', $meta['core'] . '_editable');
+        }
+        if ($coreeditablevalue === false) {
+            $coreeditablevalue = \mod_bigbluebuttonbn\local\config::get($meta['core'] . '_editable');
+        }
+
+        $coreeditable = (int)!empty($coreeditablevalue);
+        set_config($editablekey, $coreeditable, 'bbbext_bnx');
+    }
+}
+
+/**
+ * Migrate existing activity lock values from core module columns into BNX settings.
+ *
+ * @return void
+ */
+function bbbext_bnx_migrate_core_locksettings_instance_settings(): void {
+    global $DB;
+
+    $mapping = [
+        'enablecam' => ['corefield' => 'disablecam', 'invert' => true],
+        'enablemic' => ['corefield' => 'disablemic', 'invert' => true],
+        'enableprivatechat' => ['corefield' => 'disableprivatechat', 'invert' => true],
+        'enablepublicchat' => ['corefield' => 'disablepublicchat', 'invert' => true],
+        'enablenotes' => ['corefield' => 'disablenote', 'invert' => true],
+        'enableuserlist' => ['corefield' => 'hideuserlist', 'invert' => true],
+    ];
+
+    $fields = 'id, disablecam, disablemic, disableprivatechat, disablepublicchat, disablenote, hideuserlist';
+    $instances = $DB->get_records('bigbluebuttonbn', null, '', $fields);
+    $now = time();
+
+    foreach ($instances as $instance) {
+        $bnx = $DB->get_record('bbbext_bnx', ['bigbluebuttonbnid' => $instance->id], 'id');
+        if (!$bnx) {
+            $bnxid = (int)$DB->insert_record('bbbext_bnx', (object)[
+                'bigbluebuttonbnid' => $instance->id,
+                'timecreated' => $now,
+                'timemodified' => $now,
+            ]);
+        } else {
+            $bnxid = (int)$bnx->id;
+        }
+
+        foreach ($mapping as $settingname => $meta) {
+            if ($DB->record_exists('bbbext_bnx_settings', ['bnxid' => $bnxid, 'name' => $settingname])) {
+                continue;
+            }
+
+            $corevalue = (int)!empty($instance->{$meta['corefield']});
+            $bnxvalue = !empty($meta['invert']) ? (int)!$corevalue : $corevalue;
+
+            $DB->insert_record('bbbext_bnx_settings', (object)[
+                'bnxid' => $bnxid,
+                'name' => $settingname,
+                'value' => (string)$bnxvalue,
+                'timecreated' => $now,
+                'timemodified' => $now,
+            ]);
+        }
+    }
+}
+
+/**
+ * Determine if the legacy locksettings sidecar still has config to migrate.
+ *
+ * @return bool
+ */
+function bbbext_bnx_has_legacy_bnx_locksettings_data(): bool {
+    $component = 'bbbext_bnx_locksettings';
+    $pm = \core_plugin_manager::instance();
+    $installed = $pm->get_installed_plugins('bbbext');
+    if (isset($installed['bnx_locksettings'])) {
+        return true;
+    }
+
+    if (get_config($component, 'version') !== false) {
+        return true;
+    }
+
+    $configkeys = [
+        'cam_default',
+        'cam_editable',
+        'mic_default',
+        'mic_editable',
+        'publicchat_default',
+        'publicchat_editable',
+        'privatechat_default',
+        'privatechat_editable',
+        'notes_default',
+        'notes_editable',
+        'userlist_default',
+        'userlist_editable',
+        'hideviewerscursor_default',
+        'hideviewerscursor_editable',
+    ];
+
+    foreach ($configkeys as $configname) {
+        if (get_config($component, $configname) !== false) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Determine if BN Reminders appears to be installed or has legacy data to migrate.
  *
  * @return bool

@@ -1,5 +1,6 @@
-1.1 (May 1, 2026)
+1.1-beta.1 (May 1, 2026)
 - Migrates BN Reminders functionality and reminder data into BNX, consolidating reminder settings and email customization into the core BNX experience (MD-90, MD-104).
+- Migrates lock settings controls from bnx_locksettings into BNX and absorbs the legacy sidecar configuration into BNX defaults (MD-107).
 - Refactors mod form header label overrides into a reusable helper to simplify BNX-driven form customizations (MD-100).
 - Adds a shared developer debug helper for BNX sidecars.
 

@@ -45,4 +45,7 @@ function xmldb_bbbext_bnx_install() {
 
     // Migrate legacy BN Reminders data/settings and disable bnreminders if present.
     bbbext_bnx_migrate_bnreminders_data();
+
+    // One-time migration from core lock settings into BNX lock settings.
+    bbbext_bnx_migrate_core_locksettings_data();
 }

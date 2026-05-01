@@ -55,6 +55,15 @@ if ($ADMIN->fulltree) {
         'waitingroom' => [
             'approvalbeforejoin',
         ],
+        'locksettings' => [
+            'cam',
+            'mic',
+            'publicchat',
+            'privatechat',
+            'notes',
+            'userlist',
+            'hideviewerscursor',
+        ],
         'reminders' => [
             'reminder',
         ],

@@ -140,6 +140,8 @@ class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addo
      * @return void
      */
     public function definition_after_data(): void {
+        mod_form_helper::remove_lock_settings_elements($this->mform);
+
         if (!reminders_utils::is_reminders_enabled()) {
             return;
         }
@@ -172,6 +174,8 @@ class mod_form_addons extends \mod_bigbluebuttonbn\local\extension\mod_form_addo
             // Remove the wait room setting as it's replaced by approval before join.
             mod_form_helper::remove_element($this->mform, 'wait');
         }
+
+        mod_form_helper::add_lock_settings_fields($this->mform);
 
         // Add reminder fields if the feature is enabled.
         if (reminders_utils::is_reminders_enabled() && mod_form_helper::is_feature_editable('reminder')) {

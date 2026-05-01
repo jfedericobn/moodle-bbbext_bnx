@@ -18,7 +18,6 @@ namespace bbbext_bnx;
 
 use bbbext_bnx\local\sidecar_state_manager;
 use core\plugininfo\mod;
-use mod_bigbluebuttonbn\local\config;
 
 /**
  * Event observer callbacks for BN Experience extension.
@@ -49,8 +48,13 @@ class observer {
         $bnxdisabled = (int)($other['value'] ?? 0) === 1;
 
         if (!$bnxdisabled) {
+            require_once(__DIR__ . '/../db/migration.php');
+
             // Ensure BigBlueButtonBN module is enabled when BNX is enabled.
             mod::enable_plugin('bigbluebuttonbn', 1);
+
+            // One-time migration from core lock settings into BNX lock settings.
+            bbbext_bnx_migrate_core_locksettings_data();
 
             // BNX owns reminders when enabled; force-disable legacy bnreminders.
             self::disable_bnreminders_if_enabled();

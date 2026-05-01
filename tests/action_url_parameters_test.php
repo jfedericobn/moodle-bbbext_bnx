@@ -91,7 +91,11 @@ final class action_url_parameters_test extends \advanced_testcase {
 
         // Test create action.
         $resultcreate = action_url_parameters::get_parameters('create', $instanceid);
-        $this->assertEquals($expectedcreate, $resultcreate, 'Create action parameters mismatch');
+        $this->assertEquals(
+            array_merge(self::default_lock_parameters(), $expectedcreate),
+            $resultcreate,
+            'Create action parameters mismatch'
+        );
 
         // Test join action.
         $resultjoin = action_url_parameters::get_parameters('join', $instanceid);
@@ -129,6 +133,65 @@ final class action_url_parameters_test extends \advanced_testcase {
                 'expectedcreate' => [],
                 'expectedjoin' => [],
             ],
+        ];
+    }
+
+    /**
+     * Test lock settings parameters use per-instance overrides.
+     *
+     * @return void
+     */
+    public function test_lock_settings_parameters_use_instance_values(): void {
+        foreach (['cam', 'mic', 'privatechat', 'publicchat', 'notes', 'userlist', 'hideviewerscursor'] as $feature) {
+            set_config($feature . '_editable', 1, 'bbbext_bnx');
+            set_config($feature . '_default', 1, 'bbbext_bnx');
+        }
+
+        $course = $this->getDataGenerator()->create_course();
+        $bbb = $this->getDataGenerator()->create_module('bigbluebuttonbn', ['course' => $course->id]);
+        $instanceid = $bbb->id;
+
+        $bnxid = $this->ensure_bnx_record($instanceid);
+        $settings = [
+            'enablecam' => 0,
+            'enablemic' => 1,
+            'enableprivatechat' => 0,
+            'enablepublicchat' => 1,
+            'enablenotes' => 0,
+            'enableuserlist' => 1,
+            'hideviewerscursor' => 0,
+        ];
+        bnx_settings_service::get_service()->set_settings($bnxid, $settings);
+
+        $expected = [
+            'lockSettingsDisableCam' => 'true',
+            'lockSettingsDisableMic' => 'false',
+            'lockSettingsDisablePrivateChat' => 'true',
+            'lockSettingsDisablePublicChat' => 'false',
+            'lockSettingsDisableNotes' => 'true',
+            'lockSettingsHideUserList' => 'false',
+            'lockSettingsHideViewersCursor' => 'true',
+            'lockSettingsLockOnJoin' => 'true',
+        ];
+
+        $this->assertEquals($expected, action_url_parameters::get_parameters('create', $instanceid));
+    }
+
+    /**
+     * Default lock parameters emitted when no per-instance overrides exist.
+     *
+     * @return array<string, string>
+     */
+    private static function default_lock_parameters(): array {
+        return [
+            'lockSettingsDisableCam' => 'false',
+            'lockSettingsDisableMic' => 'false',
+            'lockSettingsDisablePrivateChat' => 'false',
+            'lockSettingsDisablePublicChat' => 'false',
+            'lockSettingsDisableNotes' => 'false',
+            'lockSettingsHideUserList' => 'false',
+            'lockSettingsHideViewersCursor' => 'false',
+            'lockSettingsLockOnJoin' => 'true',
         ];
     }
 

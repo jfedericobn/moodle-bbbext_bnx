@@ -53,10 +53,86 @@ class mod_instance_helper extends \mod_bigbluebuttonbn\local\extension\mod_insta
     public const REMINDERS_GUESTS_TABLE = 'bbbext_bnx_reminders_guests';
 
     /**
+     * Mapping of migrated lock settings and their runtime metadata.
+     */
+    public const LOCK_FEATURE_DEFINITIONS = [
+        'cam' => [
+            'field' => 'enablecam',
+            'setting' => 'enablecam',
+            'string' => 'mod_form_overridecam',
+            'parameter' => 'lockSettingsDisableCam',
+            'invert' => true,
+            'default' => 1,
+            'editable_default' => 1,
+        ],
+        'mic' => [
+            'field' => 'enablemic',
+            'setting' => 'enablemic',
+            'string' => 'mod_form_overridemic',
+            'parameter' => 'lockSettingsDisableMic',
+            'invert' => true,
+            'default' => 1,
+            'editable_default' => 1,
+        ],
+        'privatechat' => [
+            'field' => 'enableprivatechat',
+            'setting' => 'enableprivatechat',
+            'string' => 'mod_form_overrideprivatechat',
+            'parameter' => 'lockSettingsDisablePrivateChat',
+            'invert' => true,
+            'default' => 1,
+            'editable_default' => 1,
+        ],
+        'publicchat' => [
+            'field' => 'enablepublicchat',
+            'setting' => 'enablepublicchat',
+            'string' => 'mod_form_overridepublicchat',
+            'parameter' => 'lockSettingsDisablePublicChat',
+            'invert' => true,
+            'default' => 1,
+            'editable_default' => 1,
+        ],
+        'notes' => [
+            'field' => 'enablenote',
+            'setting' => 'enablenotes',
+            'string' => 'mod_form_overridenote',
+            'parameter' => 'lockSettingsDisableNotes',
+            'invert' => true,
+            'default' => 1,
+            'editable_default' => 1,
+        ],
+        'userlist' => [
+            'field' => 'enableuserlist',
+            'setting' => 'enableuserlist',
+            'string' => 'mod_form_overrideuserlist',
+            'parameter' => 'lockSettingsHideUserList',
+            'invert' => true,
+            'default' => 1,
+            'editable_default' => 1,
+        ],
+        'hideviewerscursor' => [
+            'field' => 'hideviewerscursor',
+            'setting' => 'hideviewerscursor',
+            'string' => 'mod_form_overridehideviewerscursor',
+            'parameter' => 'lockSettingsHideViewersCursor',
+            'invert' => true,
+            'default' => 1,
+            'editable_default' => 1,
+        ],
+    ];
+
+    /**
      * Mapping between form fields and stored setting names.
      */
     public const FEATURE_FIELD_MAP = [
         'approvalbeforejoin' => 'approvalbeforejoin',
+        'enablecam' => 'enablecam',
+        'enablemic' => 'enablemic',
+        'enableprivatechat' => 'enableprivatechat',
+        'enablepublicchat' => 'enablepublicchat',
+        'enablenote' => 'enablenotes',
+        'enableuserlist' => 'enableuserlist',
+        'hideviewerscursor' => 'hideviewerscursor',
     ];
 
     /**

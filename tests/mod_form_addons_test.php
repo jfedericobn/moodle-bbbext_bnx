@@ -64,12 +64,16 @@ final class mod_form_addons_test extends \advanced_testcase {
         $bnxid = $this->ensure_bnx_record($module->id);
 
         $service = bnx_settings_service::get_service();
-        $service->set_settings($bnxid, ['approvalbeforejoin' => 1]);
+        $service->set_settings($bnxid, [
+            'approvalbeforejoin' => 1,
+            'enablecam' => 0,
+        ]);
 
         $defaults = ['id' => $module->id];
         $addons->data_preprocessing($defaults);
 
         $this->assertSame(1, $defaults['approvalbeforejoin']);
+        $this->assertSame(0, $defaults['enablecam']);
     }
 
     /**
@@ -152,6 +156,35 @@ final class mod_form_addons_test extends \advanced_testcase {
         $addons->add_fields();
 
         $this->assertTrue($form->elementExists('bnx_reminders'));
+    }
+
+    /**
+     * Test BNX replaces core lock settings fields with migrated lock settings.
+     *
+     * @return void
+     */
+    public function test_lock_settings_fields_are_replaced_by_bnx_fields(): void {
+        global $CFG;
+
+        require_once($CFG->libdir . '/formslib.php');
+
+        set_config('cam_editable', 1, 'bbbext_bnx');
+        set_config('cam_default', 1, 'bbbext_bnx');
+
+        $form = new \MoodleQuickForm('bnxform', 'post', '');
+        $form->addElement('header', 'lock', 'Lock');
+        $form->addElement('checkbox', 'disablecam', 'Disable webcam');
+        $form->addElement('checkbox', 'disablemic', 'Disable microphone');
+
+        $addons = new mod_form_addons($form);
+        $addons->definition_after_data();
+        $addons->add_fields();
+
+        $this->assertFalse($form->elementExists('lock'));
+        $this->assertFalse($form->elementExists('disablecam'));
+        $this->assertFalse($form->elementExists('disablemic'));
+        $this->assertTrue($form->elementExists('bnxlocksettings'));
+        $this->assertTrue($form->elementExists('enablecam'));
     }
 
     /**

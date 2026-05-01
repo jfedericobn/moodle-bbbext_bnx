@@ -25,6 +25,9 @@ namespace bbbext_bnx;
  * @covers ::bbbext_bnx_migrate_bnreminders_guest_reminders
  * @covers ::bbbext_bnx_migrate_bnreminders_admin_settings
  * @covers ::bbbext_bnx_migrate_bnreminders_user_preferences
+ * @covers ::bbbext_bnx_migrate_core_locksettings_data
+ * @covers ::bbbext_bnx_migrate_core_locksettings_admin_config
+ * @covers ::bbbext_bnx_migrate_core_locksettings_instance_settings
  * @package   bbbext_bnx
  * @copyright 2026 onwards, Blindside Networks Inc
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -181,6 +184,87 @@ final class install_migration_test extends \advanced_testcase {
             'bigbluebuttonbnid' => $bbb->id,
             'timespan' => 'P1D',
         ]));
+    }
+
+    /**
+     * Core lock settings should migrate into BNX settings with proper inversion.
+     */
+    public function test_migrate_core_locksettings_with_inverted_logic(): void {
+        global $DB;
+
+        unset_config('locksettings_core_migrated', 'bbbext_bnx');
+        unset_config('cam_default', 'bbbext_bnx');
+        unset_config('cam_editable', 'bbbext_bnx');
+        unset_config('userlist_default', 'bbbext_bnx');
+        unset_config('userlist_editable', 'bbbext_bnx');
+
+        // Core admin config semantics are disable/hide by default.
+        set_config('disablecam_default', 1, 'mod_bigbluebuttonbn');
+        set_config('disablecam_editable', 1, 'mod_bigbluebuttonbn');
+        set_config('hideuserlist_default', 0, 'mod_bigbluebuttonbn');
+        set_config('hideuserlist_editable', 1, 'mod_bigbluebuttonbn');
+
+        $course = $this->getDataGenerator()->create_course();
+        $bbb = $this->getDataGenerator()->create_module('bigbluebuttonbn', [
+            'course' => $course->id,
+            'disablecam' => 1,
+            'hideuserlist' => 0,
+        ]);
+
+        // Ensure the source core values are exactly what the migration should convert.
+        $DB->set_field('bigbluebuttonbn', 'disablecam', 1, ['id' => $bbb->id]);
+        $DB->set_field('bigbluebuttonbn', 'hideuserlist', 0, ['id' => $bbb->id]);
+
+        // Ensure lock settings are not already present for this activity.
+        $bnxid = $this->ensure_bnx_instance($bbb->id);
+        $DB->delete_records('bbbext_bnx_settings', ['bnxid' => $bnxid, 'name' => 'enablecam']);
+        $DB->delete_records('bbbext_bnx_settings', ['bnxid' => $bnxid, 'name' => 'enableuserlist']);
+
+        bbbext_bnx_migrate_core_locksettings_data();
+
+        // Admin defaults are inverted from core disable/hide logic.
+        $this->assertSame('0', (string)get_config('bbbext_bnx', 'cam_default'));
+        $this->assertSame('1', (string)get_config('bbbext_bnx', 'cam_editable'));
+        $this->assertSame('1', (string)get_config('bbbext_bnx', 'userlist_default'));
+        $this->assertSame('1', (string)get_config('bbbext_bnx', 'userlist_editable'));
+
+        // Per-instance values are also inverted into BNX enable/show settings.
+        $bnx = $DB->get_record('bbbext_bnx', ['bigbluebuttonbnid' => $bbb->id], 'id', MUST_EXIST);
+        $camsetting = $DB->get_record('bbbext_bnx_settings', [
+            'bnxid' => $bnx->id,
+            'name' => 'enablecam',
+        ], '*', MUST_EXIST);
+        $userlistsetting = $DB->get_record('bbbext_bnx_settings', [
+            'bnxid' => $bnx->id,
+            'name' => 'enableuserlist',
+        ], '*', MUST_EXIST);
+
+        $this->assertSame('0', (string)$camsetting->value);
+        $this->assertSame('1', (string)$userlistsetting->value);
+        $this->assertSame('1', (string)get_config('bbbext_bnx', 'locksettings_core_migrated'));
+    }
+
+    /**
+     * Core lock migration should overwrite initial BNX defaults on first run.
+     *
+     * @return void
+     */
+    public function test_migrate_core_locksettings_overwrites_existing_bnx_defaults_once(): void {
+        unset_config('locksettings_core_migrated', 'bbbext_bnx');
+
+        // Simulate pre-existing BNX defaults created before migration runs.
+        set_config('cam_default', 1, 'bbbext_bnx');
+        set_config('cam_editable', 1, 'bbbext_bnx');
+
+        // Core semantics: 1 means disabled in core, so BNX default should become 0 after inversion.
+        set_config('disablecam_default', 1, 'mod_bigbluebuttonbn');
+        set_config('disablecam_editable', 0, 'mod_bigbluebuttonbn');
+
+        bbbext_bnx_migrate_core_locksettings_data();
+
+        $this->assertSame('0', (string)get_config('bbbext_bnx', 'cam_default'));
+        $this->assertSame('0', (string)get_config('bbbext_bnx', 'cam_editable'));
+        $this->assertSame('1', (string)get_config('bbbext_bnx', 'locksettings_core_migrated'));
     }
 
     /**

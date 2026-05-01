@@ -63,12 +63,16 @@ final class mod_instance_helper_test extends \advanced_testcase {
         $helper->add_instance((object) [
             'id' => $module->id,
             'approvalbeforejoin' => 1,
+            'enablecam' => 0,
+            'enablenote' => 1,
         ]);
 
         $service = bnx_settings_service::get_service();
         $settings = $service->get_settings($bnxid);
 
         $this->assertSame('1', $settings['approvalbeforejoin']);
+        $this->assertSame('0', $settings['enablecam']);
+        $this->assertSame('1', $settings['enablenotes']);
     }
 
     /**
