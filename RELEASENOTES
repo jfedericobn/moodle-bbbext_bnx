@@ -1,3 +1,8 @@
+1.1 (May 1, 2026)
+- Migrates BN Reminders functionality and reminder data into BNX, consolidating reminder settings and email customization into the core BNX experience (MD-90, MD-104).
+- Refactors mod form header label overrides into a reusable helper to simplify BNX-driven form customizations (MD-100).
+- Adds a shared developer debug helper for BNX sidecars.
+
 1.0.1 (April 1, 2026)
 - Adds a BNX-specific guest access endpoint (guest.php) with its own join form, URL builder, and logout redirect flow, replacing the core guest page in BNX contexts (GIT-1).
 - Hides BBB server setup instructions in the activity settings when credentials are pre-configured (MD-98).
