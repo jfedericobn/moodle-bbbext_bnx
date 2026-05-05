@@ -53,8 +53,8 @@ class observer {
             // Ensure BigBlueButtonBN module is enabled when BNX is enabled.
             mod::enable_plugin('bigbluebuttonbn', 1);
 
-            // One-time migration from core lock settings into BNX lock settings.
-            bbbext_bnx_migrate_core_locksettings_data();
+            // Refresh core lock settings into BNX on every enable.
+            bbbext_bnx_sync_core_locksettings_data();
 
             // BNX owns reminders when enabled; force-disable legacy bnreminders.
             self::disable_bnreminders_if_enabled();
