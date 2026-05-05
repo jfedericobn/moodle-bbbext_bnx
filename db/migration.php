@@ -133,6 +133,19 @@ function bbbext_bnx_migrate_core_locksettings_data(): void {
 }
 
 /**
+ * Synchronize core lock settings into BNX lock settings.
+ *
+ * This is intended for BNX enable events so that any core lock setting
+ * changes made while BNX was disabled are reflected in BNX immediately.
+ *
+ * @return void
+ */
+function bbbext_bnx_sync_core_locksettings_data(): void {
+    bbbext_bnx_migrate_core_locksettings_admin_config();
+    bbbext_bnx_migrate_core_locksettings_instance_settings(true);
+}
+
+/**
  * Migrate core lock admin defaults/editability into BNX config.
  *
  * @return void
@@ -178,9 +191,10 @@ function bbbext_bnx_migrate_core_locksettings_admin_config(): void {
 /**
  * Migrate existing activity lock values from core module columns into BNX settings.
  *
+ * @param bool $overwriteexisting When true, update existing BNX setting values.
  * @return void
  */
-function bbbext_bnx_migrate_core_locksettings_instance_settings(): void {
+function bbbext_bnx_migrate_core_locksettings_instance_settings(bool $overwriteexisting = false): void {
     global $DB;
 
     $mapping = [
@@ -209,12 +223,28 @@ function bbbext_bnx_migrate_core_locksettings_instance_settings(): void {
         }
 
         foreach ($mapping as $settingname => $meta) {
-            if ($DB->record_exists('bbbext_bnx_settings', ['bnxid' => $bnxid, 'name' => $settingname])) {
-                continue;
-            }
-
             $corevalue = (int)!empty($instance->{$meta['corefield']});
             $bnxvalue = !empty($meta['invert']) ? (int)!$corevalue : $corevalue;
+
+            $existing = $DB->get_record('bbbext_bnx_settings', [
+                'bnxid' => $bnxid,
+                'name' => $settingname,
+            ], 'id, value');
+
+            if ($existing) {
+                if (!$overwriteexisting) {
+                    continue;
+                }
+
+                if ((string)$existing->value !== (string)$bnxvalue) {
+                    $DB->update_record('bbbext_bnx_settings', (object)[
+                        'id' => $existing->id,
+                        'value' => (string)$bnxvalue,
+                        'timemodified' => $now,
+                    ]);
+                }
+                continue;
+            }
 
             $DB->insert_record('bbbext_bnx_settings', (object)[
                 'bnxid' => $bnxid,

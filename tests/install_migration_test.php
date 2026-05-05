@@ -28,6 +28,7 @@ namespace bbbext_bnx;
  * @covers ::bbbext_bnx_migrate_core_locksettings_data
  * @covers ::bbbext_bnx_migrate_core_locksettings_admin_config
  * @covers ::bbbext_bnx_migrate_core_locksettings_instance_settings
+ * @covers ::bbbext_bnx_sync_core_locksettings_data
  * @package   bbbext_bnx
  * @copyright 2026 onwards, Blindside Networks Inc
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -265,6 +266,64 @@ final class install_migration_test extends \advanced_testcase {
         $this->assertSame('0', (string)get_config('bbbext_bnx', 'cam_default'));
         $this->assertSame('0', (string)get_config('bbbext_bnx', 'cam_editable'));
         $this->assertSame('1', (string)get_config('bbbext_bnx', 'locksettings_core_migrated'));
+    }
+
+    /**
+     * Core lock settings should be synchronized on enable without duplicating rows.
+     *
+     * @return void
+     */
+    public function test_sync_core_locksettings_updates_existing_values_without_duplicates(): void {
+        global $DB;
+
+        $course = $this->getDataGenerator()->create_course();
+        $bbb = $this->getDataGenerator()->create_module('bigbluebuttonbn', [
+            'course' => $course->id,
+            'disablecam' => 1,
+        ]);
+
+        // Existing BNX values (stale) that should be refreshed by sync.
+        $bnxid = $this->ensure_bnx_instance($bbb->id);
+        $existing = $DB->get_record('bbbext_bnx_settings', [
+            'bnxid' => $bnxid,
+            'name' => 'enablecam',
+        ], 'id');
+        if ($existing) {
+            $DB->set_field('bbbext_bnx_settings', 'value', '0', ['id' => $existing->id]);
+        } else {
+            $DB->insert_record('bbbext_bnx_settings', (object) [
+                'bnxid' => $bnxid,
+                'name' => 'enablecam',
+                'value' => '0',
+                'timecreated' => time(),
+                'timemodified' => time(),
+            ]);
+        }
+
+        // Simulate core changes while BNX is disabled.
+        $DB->set_field('bigbluebuttonbn', 'disablecam', 0, ['id' => $bbb->id]);
+        set_config('disablecam_default', 0, 'mod_bigbluebuttonbn');
+        set_config('disablecam_editable', 1, 'mod_bigbluebuttonbn');
+
+        bbbext_bnx_sync_core_locksettings_data();
+
+        $camsetting = $DB->get_record('bbbext_bnx_settings', [
+            'bnxid' => $bnxid,
+            'name' => 'enablecam',
+        ], '*', MUST_EXIST);
+
+        // Core disablecam=0 becomes BNX enablecam=1.
+        $this->assertSame('1', (string)$camsetting->value);
+
+        // Admin defaults/editability should also be refreshed.
+        $this->assertSame('1', (string)get_config('bbbext_bnx', 'cam_default'));
+        $this->assertSame('1', (string)get_config('bbbext_bnx', 'cam_editable'));
+
+        // No duplicate settings row should be created.
+        $this->assertSame(1, $DB->count_records('bbbext_bnx_settings', [
+            'bnxid' => $bnxid,
+            'name' => 'enablecam',
+        ]));
     }
 
     /**
