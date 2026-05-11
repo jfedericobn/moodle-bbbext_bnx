@@ -30,6 +30,16 @@ use html_writer;
  */
 class hook_callbacks {
     /**
+     * Check whether BNX is enabled.
+     *
+     * @return bool
+     */
+    public static function is_enabled(): bool {
+        $plugininfo = \core_plugin_manager::instance()->get_plugin_info('bbbext_bnx');
+        return $plugininfo && $plugininfo->is_enabled();
+    }
+
+    /**
      * Inject the secondary navigation label override for BigBlueButton module pages.
      *
      * This hook callback runs on every page before the footer is rendered.
@@ -41,6 +51,10 @@ class hook_callbacks {
      */
     public static function before_footer(before_standard_footer_html_generation $hook): void {
         global $PAGE;
+
+        if (!self::is_enabled()) {
+            return;
+        }
 
         // Check if we're in a module context.
         $context = $PAGE->context;
