@@ -19,50 +19,43 @@
  * @module     bbbext_bnx/overridenav
  */
 
-define(['jquery'], function($) {
+// Target the BigBlueButton activity link in secondary nav (links to view.php).
+const SELECTOR = '.secondary-navigation a.nav-link[href*="/mod/bigbluebuttonbn/view.php"]';
+const LABEL_SOURCE_SELECTOR = '.bbbext-bnx-navlabel';
 
-    // Target the BigBlueButton activity link in secondary nav (links to view.php).
-    const SELECTOR = '.secondary-navigation a.nav-link[href*="/mod/bigbluebuttonbn/view.php"]';
-    const LABEL_SOURCE_SELECTOR = '.bbbext-bnx-navlabel';
+/**
+ * Determine the label to use for the secondary navigation node.
+ *
+ * @param {string} provided Optional label supplied by the caller.
+ * @returns {string|undefined}
+ */
+const resolveLabel = function (provided) {
+    if (typeof provided === 'string' && provided.trim() !== '') {
+        return provided;
+    }
 
-    /**
-     * Determine the label to use for the secondary navigation node.
-     *
-     * @param {string} provided Optional label supplied by the caller.
-     * @returns {string|undefined}
-     */
-    const resolveLabel = function(provided) {
-        if (typeof provided === 'string' && provided.trim() !== '') {
-            return provided;
-        }
-
-        const source = $(LABEL_SOURCE_SELECTOR).first();
-        const label = source.data('label');
-
+    const source = document.querySelector(LABEL_SOURCE_SELECTOR);
+    if (source) {
+        const label = source.dataset.label;
         if (typeof label === 'string' && label.trim() !== '') {
             return label;
         }
+    }
 
-        return undefined;
-    };
+    return undefined;
+};
 
-    return {
-        init: function(label) {
-            // Wait until DOM is ready.
-            $(function() {
-                const node = $(SELECTOR);
+export const init = function (label) {
+    const node = document.querySelector(SELECTOR);
 
-                if (!node.length) {
-                    return;
-                }
+    if (!node) {
+        return;
+    }
 
-                const resolvedLabel = resolveLabel(label);
-                if (!resolvedLabel) {
-                    return;
-                }
+    const resolvedLabel = resolveLabel(label);
+    if (!resolvedLabel) {
+        return;
+    }
 
-                node.text(resolvedLabel);
-            });
-        }
-    };
-});
+    node.textContent = resolvedLabel;
+};
