@@ -29,7 +29,7 @@ const LABEL_SOURCE_SELECTOR = '.bbbext-bnx-navlabel';
  * @param {string} provided Optional label supplied by the caller.
  * @returns {string|undefined}
  */
-const resolveLabel = function (provided) {
+const resolveLabel = function(provided) {
     if (typeof provided === 'string' && provided.trim() !== '') {
         return provided;
     }
@@ -45,7 +45,7 @@ const resolveLabel = function (provided) {
     return undefined;
 };
 
-export const init = function (label) {
+export const init = function(label) {
     const node = document.querySelector(SELECTOR);
 
     if (!node) {
