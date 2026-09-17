@@ -3,7 +3,7 @@
 - feat: Add BNX-owned presentation records, temporary-token limits, the `bbbext_bnx_get_file` service, secure file checks, multi-file form handling, and BigBlueButton presentation payload generation.
 - feat: Add BNX presentation backup and restore, including restored stored-file ID reconciliation and a full Moodle backup/restore integration test.
 - refactor: Remove merged Early Access and pre-upload presentation provider discovery from the BNX runtime while retaining generic alert/UI extension contracts for unrelated sidecars.
-- chore: Raise the declared Moodle support range to 5.1-5.3, retain alpha maturity, and document the clean-install decision and MDL-85873 workaround.
+- compat: Require Moodle 5.3 (Build 20260714) or later and retain the guest-link lookup shim because MDL-85873 does not provide a public replacement API.
 
 1.2 (September 4, 2026)
 - feat: Finalize the BNX 1.2 release line with support for Moodle 5.1–5.2 and a stable maturity designation.
