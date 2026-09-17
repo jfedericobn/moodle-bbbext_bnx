@@ -4,7 +4,7 @@
 - feat: Add secure presentation delivery through the BNX file service. BigBlueButton receives activity-bound, short-lived URLs with limited use counts instead of browser-session or direct stored-file URLs.
 - feat: Preserve presentation files and metadata during course backup and restore.
 - chore: Retire the unshipped `bbbext_bnx_earlyaccess` and `bbbext_bnx_preuploads` runtime paths. BNX 1.3 is a clean-install release and provides no migration from either sidecar.
-- compat: Require Moodle 5.3 (Build 20260714) or later as an alpha release. MDL-85873 is in the baseline but does not provide the public guest-link lookup API or replace BNX guest-flow hardening, so the workaround remains.
+- compat: Require Moodle 5.3 (Build 20260714) or later and delegate guest access entirely to the parent module after MDL-85873.
 
 1.2 (September 4, 2026)
 - feat: Finalize the BNX 1.2 release line with support for Moodle 5.1–5.2 and a stable maturity designation.
