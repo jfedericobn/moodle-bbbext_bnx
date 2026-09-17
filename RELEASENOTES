@@ -1,3 +1,11 @@
+1.3-alpha.1 (September 17, 2026)
+- feat: Integrate Early Access into BNX. Teachers with the `bbbext/bnx:earlyjoinaccess` capability can prepare a room before its opening time when the feature is enabled for the activity; other participants cannot infer that a pre-opening room is running.
+- feat: Integrate multi-file presentation management into BNX. Editors can manage presentation files in the activity form, and BNX includes them when it creates the BigBlueButton meeting.
+- feat: Add secure presentation delivery through the BNX file service. BigBlueButton receives activity-bound, short-lived URLs with limited use counts instead of browser-session or direct stored-file URLs.
+- feat: Preserve presentation files and metadata during course backup and restore.
+- chore: Retire the unshipped `bbbext_bnx_earlyaccess` and `bbbext_bnx_preuploads` runtime paths. BNX 1.3 is a clean-install release and provides no migration from either sidecar.
+- compat: Support Moodle 5.1 through 5.3 as an alpha release. The MDL-85873 guest-link lookup workaround remains until Moodle core provides the supported replacement API.
+
 1.2 (September 4, 2026)
 - feat: Finalize the BNX 1.2 release line with support for Moodle 5.1–5.2 and a stable maturity designation.
 - fix: Harden the guest flow, reminder handling, recordings UX, and lock-settings behavior across the release line.
